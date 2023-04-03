@@ -1,31 +1,39 @@
 use actix::prelude::*;
-struct MyActor {
-    count: usize,
-}
-
-impl Actor for MyActor {
-    type Context = Context<Self>;
-}
 
 #[derive(Message)]
-#[rtype(result = "usize")]
-struct Ping(usize);
+#[rtype(result = "Result<bool, std::io::Error>")]
+struct Ping;
+
+struct MyActor;
+impl Actor for MyActor {
+    type Context = Context<Self>;
+
+    fn started(&mut self, ctx: &mut Self::Context) {
+        println!("Actor is live");
+    }
+
+    fn stopped(&mut self, ctx: &mut Self::Context) {
+        println!("Actor is stopped");
+    }
+}
 
 impl Handler<Ping> for MyActor {
-    type Result = usize;
+    type Result = Result<bool, std::io::Error>;
 
-    fn handle(&mut self, msg: Ping, _ctx: &mut Self::Context) -> Self::Result {
-        self.count += msg.0;
-        self.count
+    fn handle(&mut self, msg: Ping, ctx: &mut Self::Context) -> Self::Result {
+        println!("Ping received");
+        Ok(true)
     }
 }
 
 #[actix_rt::main]
 async fn main() {
-    let addr = MyActor { count: 10 }.start();
+    let addr = MyActor.start();
 
-    let res = addr.send(Ping(10)).await;
+    let result = addr.send(Ping).await;
 
-    println!("RESULT: {}", res.unwrap() == 20);
-    System::current().stop();
+    match result {
+        Ok(res) => println!("Got result: {}", res.unwrap()),
+        Err(err) => println!("Got error: {}", err),
+    }
 }
