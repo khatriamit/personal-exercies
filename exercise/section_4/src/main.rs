@@ -9,11 +9,15 @@ struct User {
 struct Coordinates(i32, i32, i32);
 
 // Unit struct
-struct UnitStruct;
+struct _UnitStruct;
 
 struct Square {
     width: u32,
     height: u32,
+}
+
+struct MyString<'a> {
+    text: &'a str,
 }
 
 impl Square {
@@ -64,6 +68,21 @@ fn main() {
     println!("The width of square is {}", square1.find_width());
     square1.change_width(11, 11);
     println!("The width of square is {}", square1.find_width());
+
+    let s: &'static str = "I have a static lifetime";
+    println!("The static lifetime's value is : {}", s);
+
+    /*
+    let r;
+    {
+        let x = 5;
+        r = &x; // ERROR: borrowed value doesn't live long enough
+    } // x dropped here
+    println!("{}", r); // we are using r which is the reference to x and x doesn't live up to here & it is dangling reference
+    */
+
+    let my_string1 = MyString { text: "hello" };
+    println!("The value of my string is {}", my_string1.text)
 }
 
 fn build_user(username: String) -> User {
@@ -72,4 +91,8 @@ fn build_user(username: String) -> User {
         active: true,
         sign_in_count: 1,
     }
+}
+
+fn _example<'a, 'b>(x: &'a str, _y: &'b str) -> &'a str {
+    x
 }
