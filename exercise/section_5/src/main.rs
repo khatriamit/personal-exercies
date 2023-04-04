@@ -72,8 +72,23 @@ fn main() {
     stack.push(2);
     stack.push(3);
 
-    while let Some(top) = stack.pop() {
-        println!("{}", top);
+    let x = 1;
+    match x {
+        1 | 2 => println!("One to Two"),
+        _ => println!("Not one or two"),
+    }
+
+    match x {
+        1..=5 => println!("Matches"),
+        _ => println!("not matches"),
+    }
+
+    let x = Some(5);
+    let y = 5;
+    match x {
+        Some(10) => println!("10!"),
+        Some(x) if x == y => println!("Matches"),
+        _ => println!("Default!"),
     }
 }
 
