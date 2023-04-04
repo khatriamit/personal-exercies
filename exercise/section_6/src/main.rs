@@ -51,4 +51,23 @@ fn main() {
         author: String::from("Bob"),
     };
     println!("{}", course2.overview());
+    call_overview(&course1);
+    call_overview(&course2);
+    call_overview_simplified(&course2);
 }
+
+fn call_overview(item: &impl Overview) {
+    println!("Overview: {}", item.overview())
+}
+
+fn call_overview_simplified<T: Overview>(item: &T) {
+    println!("Overview: {}", item.overview())
+}
+/*
+    ******************* Multiple Trait Bound *******************
+    fn overview(item1: &impl Overview, item2: &impl Overview)
+    fn overview<T: Overview)(item1: &T, item2: &T)
+
+    fn overview(item1: &impl Overview+ AnotherTrait)
+    fn overview<T:Overview+ AnotherTrait>(item1: &T, item2:&T)
+*/
