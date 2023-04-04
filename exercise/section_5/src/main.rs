@@ -41,4 +41,12 @@ fn main() {
         kind: IpAddrKing::V6,
         address: "127.0.0.1".to_owned(),
     };
+
+    let some_number = Some(5);
+    let some_string = Some("a string");
+    let nothing: Option<i32> = None;
+
+    let x: i32 = 5;
+    let y: Option<i32> = Some(5);
+    let sum = x + y.expect("Some error");
 }
