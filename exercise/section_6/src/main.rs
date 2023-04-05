@@ -1,4 +1,4 @@
-use std::{fmt::format, ops::Add};
+use std::ops::Add;
 
 #[derive(Debug)]
 struct Point<T> {
