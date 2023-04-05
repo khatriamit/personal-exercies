@@ -17,6 +17,12 @@ struct Course {
     author: String,
 }
 
+impl Drop for Course {
+    fn drop(&mut self) {
+        println!("Dropping: {}", self.author);
+    }
+}
+
 struct AnotherCourse {
     headline: String,
     author: String,
@@ -54,6 +60,8 @@ fn main() {
     call_overview(&course1);
     call_overview(&course2);
     call_overview_simplified(&course2);
+
+    drop(course1);
 }
 
 fn call_overview(item: &impl Overview) {
