@@ -1,4 +1,4 @@
-use std::fmt::format;
+use std::{fmt::format, ops::Add};
 
 #[derive(Debug)]
 struct Point<T> {
@@ -39,6 +39,24 @@ impl Overview for AnotherCourse {
         format!("{} {}", self.author, self.headline)
     }
 }
+#[derive(Debug)]
+struct Points<T> {
+    x: T,
+    y: T,
+}
+
+impl<T> Add for Points<T>
+where
+    T: Add<Output = T>,
+{
+    type Output = Self;
+    fn add(self, rhs: Self) -> Self::Output {
+        Points {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+        }
+    }
+}
 fn main() {
     let p1 = Point { x: 1, y: 3 };
     println!("{:?}", p1);
@@ -62,6 +80,11 @@ fn main() {
     call_overview_simplified(&course2);
 
     drop(course1);
+
+    let coord_1 = Points { x: 5.0, y: 5.0 };
+    let coord_2 = Points { x: 1.0, y: 5.0 };
+    let sum = coord_1 + coord_2;
+    println!("The operator overloading example {:?}", sum)
 }
 
 fn call_overview(item: &impl Overview) {
