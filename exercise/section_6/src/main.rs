@@ -1,4 +1,4 @@
-use std::fmt::format;
+use std::ops::Add;
 
 #[derive(Debug)]
 struct Point<T> {
@@ -17,6 +17,12 @@ struct Course {
     author: String,
 }
 
+impl Drop for Course {
+    fn drop(&mut self) {
+        println!("Dropping: {}", self.author);
+    }
+}
+
 struct AnotherCourse {
     headline: String,
     author: String,
@@ -31,6 +37,24 @@ impl Overview for Course {
 impl Overview for AnotherCourse {
     fn overview(&self) -> String {
         format!("{} {}", self.author, self.headline)
+    }
+}
+#[derive(Debug)]
+struct Points<T> {
+    x: T,
+    y: T,
+}
+
+impl<T> Add for Points<T>
+where
+    T: Add<Output = T>,
+{
+    type Output = Self;
+    fn add(self, rhs: Self) -> Self::Output {
+        Points {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+        }
     }
 }
 fn main() {
@@ -54,6 +78,13 @@ fn main() {
     call_overview(&course1);
     call_overview(&course2);
     call_overview_simplified(&course2);
+
+    drop(course1);
+
+    let coord_1 = Points { x: 5.0, y: 5.0 };
+    let coord_2 = Points { x: 1.0, y: 5.0 };
+    let sum = coord_1 + coord_2;
+    println!("The operator overloading example {:?}", sum)
 }
 
 fn call_overview(item: &impl Overview) {
