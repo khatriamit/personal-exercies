@@ -1,7 +1,7 @@
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
-use std::collections::{BinaryHeap, HashMap};
+use std::collections::{BinaryHeap, HashMap, HashSet};
 fn main() {
     let mut nums: Vec<i32> = vec![];
 
@@ -58,4 +58,31 @@ fn main() {
     println!("{:?}", hm.get(&5));
     hm.remove(&1);
     println!("HashMap: {:?}", hm);
+
+    let mut hs1 = HashSet::new();
+    hs1.insert(1);
+    hs1.insert(2);
+    hs1.insert(3);
+
+    for x in hs1.intersection(&hs1) {
+        println!("Intersection {}", x);
+    }
+
+    let mut hs2 = HashSet::new();
+    hs2.insert(1);
+    hs2.insert(2);
+    hs2.insert(3);
+    hs2.insert(5);
+
+    for x in hs2.iter() {
+        println!("Iter: {}", x);
+    }
+    let uni = &hs2 | &hs2;
+    for x in uni {
+        println!("Union: {}", x);
+    }
+    let diff = &hs2 - &hs1;
+    for x in diff {
+        println!("Difference: {}", x);
+    }
 }
