@@ -1,5 +1,7 @@
 use rand::seq::SliceRandom;
 use rand::thread_rng;
+
+use std::collections::BinaryHeap;
 fn main() {
     let mut nums: Vec<i32> = vec![];
 
@@ -28,5 +30,18 @@ fn main() {
     println!("Reversed nums vec: {:?}", nums);
 
     nums.shuffle(&mut thread_rng());
-    print!("Shuffled: {:?}", nums)
+    println!("Shuffled: {:?}", nums);
+
+    let mut bheap = BinaryHeap::new();
+    bheap.push(10);
+    bheap.push(13);
+    bheap.push(23);
+    bheap.push(14);
+    bheap.push(18);
+
+    println!("Binary heap {:?}", bheap);
+    bheap.pop();
+    println!("Binary heap {:?}", bheap);
+    println!("peek: {:?}", bheap.peek());
+    println!("Binary heap {:?}", bheap);
 }
