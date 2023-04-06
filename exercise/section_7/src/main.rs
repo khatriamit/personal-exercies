@@ -1,7 +1,7 @@
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
-use std::collections::BinaryHeap;
+use std::collections::{BinaryHeap, HashMap};
 fn main() {
     let mut nums: Vec<i32> = vec![];
 
@@ -44,4 +44,18 @@ fn main() {
     println!("Binary heap {:?}", bheap);
     println!("peek: {:?}", bheap.peek());
     println!("Binary heap {:?}", bheap);
+
+    let mut hm = HashMap::new();
+    hm.insert(1, 1);
+    hm.insert(5, 2);
+    hm.insert(30, 3);
+    let old = hm.insert(30, 4); // here the key's value is updated and old value is assigned to new variable
+
+    println!("HashMap: {:?}", hm);
+    println!("Value: {:?}", old);
+
+    println!("{}", hm.contains_key(&6));
+    println!("{:?}", hm.get(&5));
+    hm.remove(&1);
+    println!("HashMap: {:?}", hm);
 }
