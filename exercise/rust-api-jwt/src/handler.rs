@@ -146,18 +146,6 @@ async fn logout_handler(_: jwt_auth::JwtMiddleware) -> impl Responder {
         .json(json!({"status": "success"}))
 }
 
-pub fn config(conf: &mut web::ServiceConfig) {
-    let scope = web::scope("/api")
-        .service(health_checker_handler)
-        .service(register_user_handler)
-        .service(login_user_handler)
-        .service(logout_handler)
-        .service(get_me_handlers)
-        .service(get_users_handlers);
-
-    conf.service(scope);
-}
-
 #[get("/users/me")]
 async fn get_me_handlers(
     req: HttpRequest,
@@ -201,4 +189,16 @@ async fn get_users_handlers(
         "data":serde_json::json!(filtered_data),
     });
     HttpResponse::Ok().json(json_response)
+}
+
+pub fn config(conf: &mut web::ServiceConfig) {
+    let scope = web::scope("/api")
+        .service(health_checker_handler)
+        .service(register_user_handler)
+        .service(login_user_handler)
+        .service(logout_handler)
+        .service(get_me_handlers)
+        .service(get_users_handlers);
+
+    conf.service(scope);
 }
