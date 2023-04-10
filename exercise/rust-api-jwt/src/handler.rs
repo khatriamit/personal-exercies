@@ -30,12 +30,19 @@ fn filter_user_record(user: &User) -> FilteredUser {
     }
 }
 
+#[get("/healthchecker")]
+async fn health_checker_handler() -> impl Responder {
+    const MESSAGE: &str = "JWT Authentication in Rust using Actix-web, Postgres, and SQLX";
+
+    HttpResponse::Ok().json(json!({"status": "success", "message": MESSAGE}))
+}
+
 #[post("/auth/register")]
 async fn register_user_handler(
     body: web::Json<RegisterUserSchema>,
     data: web::Data<AppState>,
 ) -> impl Responder {
-    let exists: bool = sqlx::query("SELECT EXISTS(SELECT 1 FORM users WHERE email=$1)")
+    let exists: bool = sqlx::query("SELECT EXISTS(SELECT 1 FROM users WHERE email = $1)")
         .bind(body.email.to_owned())
         .fetch_one(&data.db)
         .await
@@ -56,7 +63,7 @@ async fn register_user_handler(
 
     let query_result = sqlx::query_as!(
         User,
-        "INSERT INTO users(name, email, password) VALUES($1, $2,$3) RETURNING *",
+        "INSERT INTO users (name, email, password) VALUES($1, $2,$3) RETURNING *",
         body.name.to_string(),
         body.email.to_string().to_lowercase(),
         hashed_password
@@ -124,4 +131,74 @@ async fn login_user_handler(
     HttpResponse::Ok()
         .cookie(cookie)
         .json(json!({"status":"success", "token":token}))
+}
+
+#[get("/auth/logout")]
+async fn logout_handler(_: jwt_auth::JwtMiddleware) -> impl Responder {
+    let cookie = Cookie::build("token", "")
+        .path("/")
+        .max_age(ActixWebDuration::new(-1, 0))
+        .http_only(true)
+        .finish();
+
+    HttpResponse::Ok()
+        .cookie(cookie)
+        .json(json!({"status": "success"}))
+}
+
+pub fn config(conf: &mut web::ServiceConfig) {
+    let scope = web::scope("/api")
+        .service(health_checker_handler)
+        .service(register_user_handler)
+        .service(login_user_handler)
+        .service(logout_handler)
+        .service(get_me_handlers)
+        .service(get_users_handlers);
+
+    conf.service(scope);
+}
+
+#[get("/users/me")]
+async fn get_me_handlers(
+    req: HttpRequest,
+    data: web::Data<AppState>,
+    _: jwt_auth::JwtMiddleware,
+) -> impl Responder {
+    let ext = req.extensions();
+    let user_id = ext.get::<uuid::Uuid>().unwrap();
+    let user = sqlx::query_as!(User, "SELECT * FROM users WHERE id = $1", user_id)
+        .fetch_one(&data.db)
+        .await
+        .unwrap();
+    let json_response = serde_json::json!({
+        "status":"success",
+        "data":serde_json::json!({
+            "user":filter_user_record(&user)
+        })
+    });
+    HttpResponse::Ok().json(json_response)
+}
+
+#[get("/users/all")]
+async fn get_users_handlers(
+    req: HttpRequest,
+    data: web::Data<AppState>,
+    _: jwt_auth::JwtMiddleware,
+) -> impl Responder {
+    let ext = req.extensions();
+    let user_id = ext.get::<uuid::Uuid>().unwrap();
+    println!("{user_id}");
+    let users = sqlx::query_as!(User, "SELECT * FROM users")
+        .fetch_all(&data.db)
+        .await
+        .unwrap();
+    let filtered_data: Vec<FilteredUser> = users
+        .into_iter()
+        .map(|user| filter_user_record(&user))
+        .collect();
+    let json_response = serde_json::json!({
+        "status":"success",
+        "data":serde_json::json!(filtered_data),
+    });
+    HttpResponse::Ok().json(json_response)
 }
