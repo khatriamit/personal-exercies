@@ -1,0 +1,13 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgres:latest
+    container_name: actix-postgres
+    ports:
+      - "6500:5432"
+    volumes:
+      - actix-postgresDB:/var/lib/postgresql/data
+    env_file:
+      - ./.env
+volumes:
+  actix-postgresDB:
