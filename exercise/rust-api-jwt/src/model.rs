@@ -27,12 +27,12 @@ pub struct TokenClaims {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct RegisterUserSchema {
     pub name: String,
-    pub email: usize,
-    pub password: usize,
+    pub email: String,
+    pub password: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct LoginUserSchema {
-    pub email: usize,
-    pub password: usize,
+    pub email: String,
+    pub password: String,
 }
