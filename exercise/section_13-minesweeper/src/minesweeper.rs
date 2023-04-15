@@ -18,6 +18,7 @@ pub struct MineSweeper {
     open_fields: HashSet<Position>,
     mines: HashSet<Position>,
     flagged_fields: HashSet<Position>,
+    lost: bool,
 }
 
 impl Display for MineSweeper {
@@ -27,7 +28,9 @@ impl Display for MineSweeper {
                 let pos = (x, y);
 
                 if !self.open_fields.contains(&pos) {
-                    if self.flagged_fields.contains(&pos) {
+                    if self.lost && self.mines.contains(&pos) {
+                        f.write_str("🔥 ")?;
+                    } else if self.flagged_fields.contains(&pos) {
                         f.write_str("🚩 ")?;
                     } else {
                         f.write_str("🟪 ")?;
@@ -35,7 +38,12 @@ impl Display for MineSweeper {
                 } else if self.mines.contains(&pos) {
                     f.write_str("🔥 ")?;
                 } else {
-                    write!(f, " {} ", self.neighboring_mines(pos))?;
+                    let mine_count = self.neighboring_mines(pos);
+                    if mine_count > 0 {
+                        write!(f, " {} ", mine_count)?;
+                    } else {
+                        f.write_str("⬜️ ")?;
+                    }
                 }
             }
             f.write_char('\n')?;
@@ -58,14 +66,15 @@ impl MineSweeper {
                 mines
             },
             flagged_fields: HashSet::new(),
+            lost: false,
         }
     }
 
     pub fn iter_neighbors(&self, (x, y): Position) -> impl Iterator<Item = Position> {
         let width = self.width;
         let height = self.height;
-        (x.min(1) - 1..=(x + 1).min(width - 1))
-            .flat_map(move |i| (y.min(1) - 1..=(y + 1).min(height - 1)).map(move |j| (i, j)))
+        (x.max(1) - 1..=(x + 1).min(width - 1))
+            .flat_map(move |i| (y.max(1) - 1..=(y + 1).min(height - 1)).map(move |j| (i, j)))
             .filter(move |&pos| pos != (x, y))
     }
 
@@ -76,21 +85,31 @@ impl MineSweeper {
     }
 
     pub fn open(&mut self, position: Position) -> Option<OpenResult> {
-        if self.flagged_fields.contains(&position) {
+        if self.lost
+            || self.open_fields.contains(&position)
+            || self.flagged_fields.contains(&position)
+        {
             return None;
         }
         self.open_fields.insert(position);
 
         let is_mine = self.mines.contains(&position);
         if is_mine {
+            self.lost = true;
             Some(OpenResult::Mine)
         } else {
-            Some(OpenResult::NoMine(self.neighboring_mines(position)))
+            let mine_count = self.neighboring_mines(position);
+            if mine_count == 0 {
+                for neighbor in self.iter_neighbors(position) {
+                    self.open(neighbor);
+                }
+            }
+            Some(OpenResult::NoMine(mine_count))
         }
     }
 
     pub fn toggle_flag(&mut self, pos: Position) {
-        if self.open_fields.contains(&pos) {
+        if self.lost || self.open_fields.contains(&pos) {
             return;
         }
         if self.flagged_fields.contains(&pos) {
