@@ -1914,6 +1914,13 @@ name = "section_12"
 version = "0.1.0"
 
 [[package]]
+name = "section_13-minesweeper"
+version = "0.1.0"
+dependencies = [
+ "rand",
+]
+
+[[package]]
 name = "section_4"
 version = "0.1.0"
 
